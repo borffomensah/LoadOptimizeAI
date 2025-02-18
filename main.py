@@ -6,17 +6,13 @@ from prophet import Prophet
 from prophet.plot import plot_plotly
 
 # Load the trained Prophet model
-# model = joblib.load('prophet_model.joblib')
-
-model = joblib.load(r'C:\Users\ACER\Desktop\WORKLOAD\Deployment\prophet_model.joblib')
-
+model = joblib.load("cr_model.pkl")  # Use relative path
 
 # Streamlit app header
-# st.image("crod.png")
-st.image(r"C:\Users\ACER\Desktop\WORKLOAD\Deployment\crod.png")
+st.image("crod.png")  # Use relative path
 st.title("Workload Forecasting App")
 
-# Sidebar for forecast period selection and other inputs
+# Sidebar for forecast period selection
 st.sidebar.header("Forecast Settings")
 
 # Sidebar for date range input
