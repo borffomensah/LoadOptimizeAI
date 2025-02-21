@@ -70,6 +70,6 @@ The project leveraged time series analysis and machine learning techniques to cr
 
 # Results
 The project demonstrated the effectiveness of time series models in predicting workload trends. The best-performing model achieved an RMSE of 10350.16 and MAE of 7793.57, indicating high accuracy in forecasting. The results can be used to optimize resource allocation and improve operational efficiency.
-# Streamlit
+# Deployment 
 The model was then deployed on streamlit for end users experience.Attached is the link to the streamlit app 
 https://workload-forecaster24.streamlit.app/
