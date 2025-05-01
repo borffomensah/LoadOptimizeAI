@@ -1,12 +1,8 @@
-# Data manipulation and visualization
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.express as px
 import plotly.graph_objects as go
-from prophet import Prophet
-from prophet.plot import plot_plotly, plot_components_plotly
 import joblib
+from prophet import Prophet
 
 # Load the trained Prophet model
 model = joblib.load("cr_model.pkl")
@@ -15,126 +11,104 @@ model = joblib.load("cr_model.pkl")
 st.image("crod.png")
 st.title("Workload Forecasting App")
 
-# Sidebar for forecast period selection
+# Sidebar for forecast settings
 st.sidebar.header("Forecast Settings")
-
-# Sidebar for date range input
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime('2024-11-05'))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime('2024-12-31'))
-
-# Sidebar for frequency selection
 forecast_period = st.sidebar.selectbox("Select Forecast Period:", ["Weekly", "Monthly", "Quarterly", "Yearly"])
-
-# Sidebar button to trigger forecast
 forecast_button = st.sidebar.button("Forecast")
 
-# Function to make future dataframe based on selected period
-def make_future_dataframe(periods, freq):
-    future = model.make_future_dataframe(periods=periods, freq=freq)
-    return future
-
-# Map frequency selection to corresponding time frequency
+# Frequency mapping with proper offset aliases
 freq_map = {
     "Weekly": "W",
-    "Monthly": "M",
-    "Quarterly": "Q",
-    "Yearly": "Y"
+    "Monthly": "MS",  # Month start
+    "Quarterly": "QS-JAN",  # Quarter start aligned with January
+    "Yearly": "YS"  # Year start
 }
 
-# Generate the forecast if the button is clicked
 if forecast_button:
     try:
-        # Calculate periods based on the selected forecast period
-        if forecast_period == "Weekly":
-            periods = (end_date - start_date).days // 7
-            freq = 'W'
-        elif forecast_period == "Monthly":
-            periods = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
-            freq = 'M'
-        elif forecast_period == "Quarterly":
-            periods = (end_date.year - start_date.year) * 4 + (end_date.month - start_date.month) // 3
-            freq = 'Q'
-        elif forecast_period == "Yearly":
-            periods = end_date.year - start_date.year
-            freq = 'Y'
+        # Get the last training date from the model's history
+        last_training_date = pd.to_datetime(model.history['ds'].iloc[-1])
+        st.write(f"Last training date in model: {last_training_date.date()}")
+        
+        # Convert start_date and end_date to Timestamps for comparison
+        start_date_ts = pd.Timestamp(start_date)
+        end_date_ts = pd.Timestamp(end_date)
 
-        # Handle cases where periods are zero or negative
+        # Validate dates
+        if start_date_ts >= end_date_ts:
+            st.error("End date must be after Start date")
+            st.stop()
+            
+        if end_date_ts <= last_training_date:
+            st.error(f"End date must be after last training date ({last_training_date.date()})")
+            st.stop()
+
+        # Calculate required periods
+        freq = freq_map[forecast_period]
+        date_range = pd.date_range(start=last_training_date, end=end_date_ts, freq=freq)
+        periods = len(date_range)
+        
         if periods <= 0:
-            st.error("The selected date range does not allow for a valid forecast. Please adjust the dates.")
+            st.error("No periods to forecast. Adjust dates or select a different frequency.")
             st.stop()
 
         # Generate future dataframe
-        future = make_future_dataframe(periods, freq)
-
-        # Generate the forecast
+        future = model.make_future_dataframe(periods=periods, freq=freq, include_history=False)
         forecast = model.predict(future)
 
-        # Rename columns for better readability
-        forecast_renamed = forecast.rename(columns={
+        # Filter to selected date range
+        forecast_filtered = forecast[
+            (forecast['ds'] >= start_date_ts) &
+            (forecast['ds'] <= end_date_ts)
+        ].rename(columns={
             'ds': 'DATE',
             'yhat': 'PREDICTED',
             'yhat_lower': 'LOWER VALUE',
             'yhat_upper': 'UPPER VALUE'
         })
 
-        # Filter the forecast to only include the selected date range
-        forecast_filtered = forecast_renamed[
-            (forecast_renamed['DATE'] >= pd.to_datetime(start_date)) &
-            (forecast_renamed['DATE'] <= pd.to_datetime(end_date))
-        ]
+        # Check if filtered forecast is empty
+        if forecast_filtered.empty:
+            st.error("No data in selected date range. Adjust dates or check frequency.")
+            st.stop()
 
-        # Display forecast plot
+        # Display results
         st.subheader(f"{forecast_period} Forecast")
         
-        # Create custom Plotly figure instead of using plot_plotly
+        # Plotting
         fig = go.Figure()
-        
-        # Add predicted line
         fig.add_trace(go.Scatter(
-            x=forecast['ds'],
-            y=forecast['yhat'],
+            x=forecast['ds'], 
+            y=forecast['yhat'], 
             name='Predicted',
             line=dict(color='blue')
         ))
-        
-        # Add uncertainty interval
         fig.add_trace(go.Scatter(
             x=forecast['ds'].tolist() + forecast['ds'].tolist()[::-1],
             y=forecast['yhat_upper'].tolist() + forecast['yhat_lower'].tolist()[::-1],
             fill='toself',
             fillcolor='rgba(0,0,255,0.2)',
             line=dict(color='rgba(255,255,255,0)'),
-            name='Uncertainty Interval'
+            name='Uncertainty'
         ))
-
-        # Update layout
         fig.update_layout(
             title=f"{forecast_period} Forecast",
             xaxis_title="Date",
             yaxis_title="Value",
-            hovermode='x unified',
-            showlegend=True
+            hovermode='x unified'
         )
-
-        # Display the plot
         st.plotly_chart(fig)
 
-        # Display forecast data as a table for the selected date range
-        st.subheader(f"{forecast_period} Forecast Data")
-        st.write(forecast_filtered[['DATE', 'PREDICTED', 'LOWER VALUE', 'UPPER VALUE']])
+        st.subheader("Forecast Data")
+        st.dataframe(forecast_filtered[['DATE', 'PREDICTED', 'LOWER VALUE', 'UPPER VALUE']])
 
     except Exception as e:
-        st.error(f"An error occurred while generating the forecast: {e}")
-        
-        # Fallback to matplotlib if Plotly fails
-        st.subheader("Fallback Visualization")
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(forecast['ds'], forecast['yhat'], label='Predicted', color='blue')
-        ax.fill_between(forecast['ds'], forecast['yhat_lower'], forecast['yhat_upper'], color='blue', alpha=0.2)
-        ax.set_title(f"{forecast_period} Forecast")
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Value")
-        ax.legend()
-        st.pyplot(fig)
-else:
-    st.write("Please select forecast parameters and click on 'Forecast' to generate the predictions.")
+        st.error(f"Critical error: {str(e)}")
+        st.write("Troubleshooting Checklist:")
+        st.write("1. Ensure model file (cr_model.pkl) exists and is a valid Prophet model")
+        st.write("2. Verify selected dates are after the last training date")
+        st.write("3. Check frequency alignment (monthly forecasts need month-start dates)")
+        st.write("4. Confirm the date range contains forecastable periods")
+        st.write(f"Last training date: {last_training_date if 'last_training_date' in locals() else 'Unknown'}")
