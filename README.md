@@ -38,7 +38,7 @@ Models were assessed using:
 The Prophet model outperformed ARIMA in terms of forecasting accuracy, achieving an RMSE of 10,350.16 and MAE of 7,793.57. These findings align with previous studies that highlight the robustness of Prophet in handling complex seasonality (Harris et al., 2022). The generated forecasts can assist organizations in optimizing workload management and resource allocation.
 
 **5. Deployment with Streamlit**
-The best-performing model was deployed using Streamlit, allowing users to input data and obtain real-time workload forecasts. The application is accessible at: [https://workload-forecaster24.streamlit.app/](https://workload-forecaster24.streamlit.app/).
+The best-performing model was deployed using Streamlit, allowing users to input data and obtain real-time workload forecasts. The application is accessible at: (https://cr-workload-forecaster.streamlit.app/).
 
 **6. Conclusion & Future Work**
 This study demonstrates the potential of machine learning for workload forecasting, providing a reliable tool for predictive resource planning. Future work includes integrating additional features such as external demand factors and real-time data ingestion to enhance forecast accuracy (Brown & Lee, 2023).
