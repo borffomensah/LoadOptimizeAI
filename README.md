@@ -43,27 +43,5 @@ The best-performing model was deployed using Streamlit, allowing users to input 
 **6. Conclusion & Future Work**
 This study demonstrates the potential of machine learning for workload forecasting, providing a reliable tool for predictive resource planning. Future work includes integrating additional features such as external demand factors and real-time data ingestion to enhance forecast accuracy (Brown & Lee, 2023).
 
-**References**
-
-Anderson, R., & White, D. (2020). Time series forecasting in workload prediction: Challenges and solutions. *Journal of Forecasting, 32*(1), 45-60.
-
-Brown, T., & Lee, K. (2023). Advanced hybrid models for workload forecasting. *Computational Intelligence and Applications, 18*(2), 102-118.
-
-Brown, P., Johnson, M., & Taylor, S. (2020). Machine learning approaches for workload prediction. *International Journal of AI & Forecasting, 27*(3), 78-91.
-
-Chen, Y., Davis, K., & Evans, S. (2023). Prophet-based time series forecasting for workload optimization. *Data Science in Operations, 40*(4), 200-215.
-
-Harris, L., Miller, J., & Zhang, X. (2022). The impact of seasonality-aware models on workload forecasting. *Journal of Predictive Analytics, 29*(1), 12-28.
-
-Jones, R., Lee, C., & Patel, N. (2023). Performance evaluation of ARIMA and Prophet in workload management. *Operations Research and Machine Learning, 38*(1), 89-104.
-
-Lee, C., & Zhang, X. (2022). Hybrid time series models for dynamic workload prediction. *Journal of Applied Machine Learning, 27*(2), 99-110.
-
-Miller, K., & Harris, B. (2021). Comparing ARIMA and Prophet for time series forecasting. *Journal of Statistical Computing, 25*(5), 120-135.
-
-Smith, J., Taylor, B., & Williams, H. (2021). Leveraging machine learning for workload forecasting. *Journal of Artificial Intelligence Applications, 19*(3), 89-104.
-
-Taylor, B., Adams, P., & White, E. (2020). Evaluating time series decomposition techniques for workload prediction. *Journal of Data Science, 15*(6), 211-225.
-
-Williams, H. (2019). Handling missing data in time series forecasting. *AI in Operations Research, 12*(4), 56-78.
+Designed & Engineered by Daniel Borffo Mensah | Data Scientist, Statistical/Quantitative Analyst & Machine Learning Engineer
 
